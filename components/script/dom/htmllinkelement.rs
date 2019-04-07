@@ -113,6 +113,9 @@ impl HTMLLinkElement {
             doc.remove_stylesheet(self.upcast(), s)
         }
         *self.stylesheet.borrow_mut() = Some(s.clone());
+        if let Some(cssom_stylesheet) = self.get_cssom_stylesheet() {
+            cssom_stylesheet.set_owner(None);
+        }
         self.cssom_stylesheet.set(None);
         doc.add_stylesheet(self.upcast(), s);
     }
@@ -250,7 +253,9 @@ impl VirtualMethods for HTMLLinkElement {
         if let Some(ref s) = self.super_type() {
             s.unbind_from_tree(context);
         }
-
+        if let Some(cssom_stylesheet) = self.get_cssom_stylesheet() {
+            cssom_stylesheet.set_owner(None);
+        }
         if let Some(s) = self.stylesheet.borrow_mut().take() {
             document_from_node(self).remove_stylesheet(self.upcast(), &s);
         }
